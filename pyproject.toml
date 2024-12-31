@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "wyoming-salutespeech-gateway"
+version = "0.1.0"
+description = ""
+authors = ["sergemart <serge.martynov@gmail.com>"]
+readme = "README.md"
+packages = [{include = "wyoming_salutespeech_gateway", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.32.3"
+wyoming = {git = "https://github.com/rhasspy/wyoming.git"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
