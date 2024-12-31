@@ -7,6 +7,7 @@ import wave
 
 from . import server
 
+
 # region =============================================== The app context
 
 cli_args: argparse.Namespace
@@ -15,7 +16,7 @@ token: str = ""
 token_expiration_time: int = 0
 token_expiration_time_delta: int = 30   # A protection interval before the expiration time, in seconds
 
-_LOGGER: logging.Logger
+LOGGER: logging.Logger
 
 
 # endregion
@@ -24,7 +25,7 @@ _LOGGER: logging.Logger
 def start() -> None:
     """ Start the app """
 
-    _LOGGER.info('Wyoming-Salutespeech Gateway is starting')
+    LOGGER.info('Wyoming-Salutespeech Gateway is starting')
     asyncio.run( server.run() )
 
 
@@ -47,27 +48,25 @@ def parse_arguments() -> None:
     parser.add_argument("--log-level", default="WARNING", help="Log level, like 'ERROR', 'INFO', 'DEBUG' etc.")
 
     cli_args = parser.parse_args()
-    return
 
 
 def setup_custom_logger(name) -> None:
     """ Set up the app logger"""
 
-    global _LOGGER
+    global LOGGER
     formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
 
-    _LOGGER = logging.getLogger(name)
-    _LOGGER.setLevel( logging.getLevelNamesMapping()[cli_args.log_level] )
-    _LOGGER.addHandler(handler)
+    LOGGER = logging.getLogger(name)
+    LOGGER.setLevel(logging.getLevelNamesMapping()[cli_args.log_level])
+    LOGGER.addHandler(handler)
 
 
 def check_if_token_expired() -> bool:
     """Check if the authentication token expired. Returns True if the token is expired"""
 
-    global token_expiration_time
-    global token_expiration_time_delta
+    global token_expiration_time, token_expiration_time_delta
     current_time: int = int( time.time() )
     result: bool = current_time > token_expiration_time - token_expiration_time_delta
     return result
@@ -82,7 +81,7 @@ def write_wav_file(filename: str, data: bytes) -> None:
         wav_file.setsampwidth(2)
         wav_file.setframerate(16000)
         wav_file.writeframes(data)
-    _LOGGER.debug(f"Audio written to file {filename}")
+    LOGGER.debug(f"Audio is written to the file {filename}")
 
 
 # endregion

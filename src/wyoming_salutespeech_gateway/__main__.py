@@ -1,6 +1,5 @@
 __package__ = 'wyoming_salutespeech_gateway'
 
-import logging
 from . import app
 
 

@@ -1,0 +1,1 @@
+A gateway between a Wyoming protocol client and SberDevices SaluteSpeech STT/TTS cloud service.
