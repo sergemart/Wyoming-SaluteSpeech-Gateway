@@ -13,7 +13,7 @@ from wyoming.event import Event
 from wyoming.info import Describe, Info
 from wyoming.server import AsyncEventHandler
 
-from . import app, model_stub
+from . import app, server, model_stub
 
 
 class GatewayEventHandler(AsyncEventHandler):
@@ -21,9 +21,6 @@ class GatewayEventHandler(AsyncEventHandler):
 
     def __init__(
         self,
-        wyoming_info: Info,
-        cli_args: argparse.Namespace,
-        model: model_stub.SaluteSpeechModel,
         model_lock: asyncio.Lock,
         *args,
         **kwargs,
@@ -32,11 +29,9 @@ class GatewayEventHandler(AsyncEventHandler):
 
         super().__init__(*args, **kwargs)
 
-        self._cli_args = cli_args
-        self._wyoming_info_event = wyoming_info.event()
-        self._model = model
+        self._model = model_stub.SaluteSpeechModel()
         self._model_lock = model_lock
-        self._language = self._cli_args.language
+        self._language = app.cli_args.language
         self._temp_dir = tempfile.TemporaryDirectory()
         self._audio = b""
         self._audio_converter = AudioChunkConverter(rate=16000, width=2, channels=1)
@@ -46,8 +41,8 @@ class GatewayEventHandler(AsyncEventHandler):
         """Handle the event"""
 
         if Describe.is_type(event.type):
-            await self.write_event(self._wyoming_info_event)
-            app.LOGGER.debug("Processed a 'Describe' event: Wyoming info sent to client.")
+            await self.write_event( server.get_wyoming_info().event() )
+            app.LOGGER.debug("Processed a 'Describe' event: Wyoming info is sent to the client.")
             return True
 
         if Transcribe.is_type(event.type):
@@ -81,7 +76,7 @@ class GatewayEventHandler(AsyncEventHandler):
 
             # Clean up
             self._audio = b""
-            self._language = self._cli_args.language
+            self._language = app.cli_args.language
             Path(filename).unlink()
             app.LOGGER.debug(f"Processed an 'AudioStop' event: deleted the intermediate audio file {filename}")
 

@@ -63,7 +63,7 @@ def recognize(audio: bytes, language: str) -> str:
 		'Content-Type': 'audio/x-pcm;bit=16;rate=16000',
 	  	'Accept': 'application/json',
 	  	'RqUID': str( uuid4() ),
-		'Authorization': 'Bearer {}'.format(_get_auth_token())
+		'Authorization': f'Bearer {_get_auth_token()}'
 	}
 	params = {
 		'language': language,

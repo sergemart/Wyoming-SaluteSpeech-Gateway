@@ -53,9 +53,6 @@ async def run():
     await wyoming_server.run(
         partial(
             GatewayEventHandler,
-            get_wyoming_info(),
-            app.cli_args,
-            model_stub.SaluteSpeechModel(),
             model_lock,
         )
     )
