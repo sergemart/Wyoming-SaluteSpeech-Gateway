@@ -11,11 +11,10 @@ from . import server
 # region =============================================== The app context
 
 cli_args: argparse.Namespace
-
 token: str = ""
 token_expiration_time: int = 0
 token_expiration_time_delta: int = 30   # A protection interval before the expiration time, in seconds
-
+client_http_session = None
 LOGGER: logging.Logger
 
 

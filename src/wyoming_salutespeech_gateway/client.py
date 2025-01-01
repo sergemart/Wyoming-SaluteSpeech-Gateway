@@ -70,7 +70,15 @@ def recognize(audio: bytes, language: str) -> str:
 		'model': app.cli_args.salutespeech_model,
 		'sample_rate': 16000
 	}
-	response = requests.request("POST", app.cli_args.salutespeech_url, headers=headers, params=params, data=audio)
+
+	# Reuse HTTP(S) session if possible
+	if not app.client_http_session:
+		app.LOGGER.debug("Creating a new HTTP(S) session with the cloud service.")
+		app.client_http_session = requests.Session()
+	else:
+		app.LOGGER.debug("Reusing the existing HTTP(S) session with the cloud service.")
+
+	response = app.client_http_session.request("POST", app.cli_args.salutespeech_url, headers=headers, params=params, data=audio)
 	app.LOGGER.debug(f"Response JSON: {str(response.json())}.")
 
 	if response.status_code == 200:
