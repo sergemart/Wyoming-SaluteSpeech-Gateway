@@ -8,20 +8,6 @@ from . import app, ca_cert
 
 # region =============================================== Subroutines
 
-def _setup_ca_cert() -> None:
-	"""Place custom CA certificate in the app's certificate storage"""
-
-	try:
-		app.LOGGER.debug('Checking SSL connection.')
-		requests.get(app.cli_args.sber_auth_url)
-		app.LOGGER.debug('SSL connection OK.')
-	except requests.exceptions.SSLError:
-		app.LOGGER.debug('SSL Error. Adding custom certs to the Certifi store.')
-		with open(certifi.where(), 'ab') as certifi_ca_store:
-			certifi_ca_store.write( ca_cert.get() )
-	return
-
-
 def _get_auth_token() -> str:
 	"""Get authentication token"""
 
@@ -54,6 +40,20 @@ def _get_auth_token() -> str:
 
 # endregion
 # region =============================================== Interface
+
+def setup_ca_cert() -> None:
+	"""Place custom CA certificate in the app's certificate storage"""
+
+	try:
+		app.LOGGER.debug('Checking SSL connection to the SberSpeech service.')
+		requests.get(app.cli_args.sber_auth_url)
+		app.LOGGER.debug('SSL connection OK, required CA certificate is presented in the Certifi store.')
+	except requests.exceptions.SSLError:
+		app.LOGGER.debug('SSL error, it seems there is no required CA certificate in the Certifi store. Adding one.')
+		with open(certifi.where(), 'ab') as certifi_ca_store:
+			certifi_ca_store.write( ca_cert.get() )
+	return
+
 
 def recognize(audio: bytes, language: str) -> str:
 	"""Recognize the speech"""

@@ -5,7 +5,7 @@ import tempfile
 import time
 import wave
 
-from . import server
+from . import server, client
 
 
 # region =============================================== The app context
@@ -25,6 +25,7 @@ def start() -> None:
     """ Start the app """
 
     LOGGER.info('Wyoming-Salutespeech Gateway is starting')
+    client.setup_ca_cert()
     asyncio.run( server.run() )
 
 
