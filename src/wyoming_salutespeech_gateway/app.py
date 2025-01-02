@@ -5,6 +5,7 @@ import asyncio
 import logging
 import tempfile
 import time
+import datetime
 import wave
 
 from . import server, client
@@ -14,8 +15,8 @@ from . import server, client
 
 cli_args: argparse.Namespace
 token: str = ""
-token_expiration_time: int = 0
-token_expiration_time_delta: int = 30   # A protection interval before the expiration time, in seconds
+token_expiration_timestamp: float = 0.0
+token_expiration_time_delta: float = 30.0   # A protection interval before the expiration time, in seconds
 client_http_session = None
 LOGGER: logging.Logger
 
@@ -65,12 +66,17 @@ def setup_custom_logger(name) -> None:
     LOGGER.addHandler(handler)
 
 
+def get_time_from_timestamp(timestamp: float):
+    """ Get a human-readable time string from the unix (epoch) time number"""
+    return datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
+
+
 def check_if_token_expired() -> bool:
     """Check if the authentication token expired. Returns True if the token is expired"""
 
-    global token_expiration_time, token_expiration_time_delta
+    global token_expiration_timestamp, token_expiration_time_delta
     current_time: int = int( time.time() )
-    result: bool = current_time > token_expiration_time - token_expiration_time_delta
+    result: bool = current_time > token_expiration_timestamp - token_expiration_time_delta
     return result
 
 

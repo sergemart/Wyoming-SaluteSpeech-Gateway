@@ -14,10 +14,12 @@ def _get_auth_token() -> str:
 	# Check if the token expired
 	if not app.check_if_token_expired():
 		app.LOGGER.debug(f"Access token is still valid, using the stored one.")
+		app.LOGGER.debug(f"The stored token expiration time: {app.get_time_from_timestamp(app.token_expiration_timestamp)}")
 		return app.token
 
 	# If the token is expired proceed to get a new one
 	app.LOGGER.debug(f"Access token is expired, getting a new one.")
+	app.LOGGER.debug(f"The expired token expiration time: {app.get_time_from_timestamp(app.token_expiration_timestamp)}")
 	url = app.cli_args.sber_auth_url
 	payload = 'scope=SALUTE_SPEECH_PERS'
 	headers = {
@@ -30,8 +32,9 @@ def _get_auth_token() -> str:
 
 	if response.status_code == 200:
 		app.token = response.json().get('access_token')
-		app.token_expiration_time = response.json().get('expires_at')
+		app.token_expiration_timestamp = float( response.json().get('expires_at') ) / 1000 # Sber cloud sends the epoch timestamp in milliseconds
 		app.LOGGER.debug(f'Access token is successfully received.')
+		app.LOGGER.debug(f"The new token expiration time: {app.get_time_from_timestamp(app.token_expiration_timestamp)}")
 		return app.token
 	else:
 		app.LOGGER.debug(f"Failed to get an access token: response status code: {response.status_code}, response text: '{response.text}'.")
@@ -47,7 +50,7 @@ def setup_ca_cert() -> None:
 	try:
 		app.LOGGER.debug('Checking SSL connection to the SberSpeech service.')
 		requests.get(app.cli_args.sber_auth_url)
-		app.LOGGER.debug('SSL connection OK, required CA certificate is presented in the Certifi store.')
+		app.LOGGER.debug('SSL connection OK, required CA certificate exists in the Certifi store.')
 	except requests.exceptions.SSLError:
 		app.LOGGER.debug('SSL error, it seems there is no required CA certificate in the Certifi store. Adding one.')
 		with open(certifi.where(), 'ab') as certifi_ca_store:
