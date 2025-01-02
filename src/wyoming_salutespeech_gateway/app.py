@@ -1,3 +1,5 @@
+__package__ = 'wyoming_salutespeech_gateway'
+
 import argparse
 import asyncio
 import logging

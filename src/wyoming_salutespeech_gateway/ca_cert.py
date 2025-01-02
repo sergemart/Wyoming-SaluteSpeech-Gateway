@@ -1,3 +1,5 @@
+__package__ = 'wyoming_salutespeech_gateway'
+
 from io import BytesIO
 
 # Russian sub CA
