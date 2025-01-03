@@ -10,7 +10,7 @@ import datetime
 import wave
 
 from . import server, client
-from .client import recognize
+
 
 # region =============================================== The app context
 
