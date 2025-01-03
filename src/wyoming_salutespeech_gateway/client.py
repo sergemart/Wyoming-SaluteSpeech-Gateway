@@ -28,7 +28,7 @@ def _get_auth_token() -> str:
 	  'RqUID': str( uuid4() ),
 	  'Authorization': f'Basic {app.cli_args.auth_key}'
 	}
-	response = requests.request("POST", url, headers=headers, data=payload)
+	response = app.client_http_session.request("POST", url, headers=headers, data=payload)
 
 	if response.status_code == 200:
 		app.token = response.json().get('access_token')
@@ -45,16 +45,26 @@ def _get_auth_token() -> str:
 # region =============================================== Interface
 
 def setup_ca_cert() -> None:
-	"""Place custom CA certificate in the app's certificate storage"""
+	"""Place custom CA certificate in the app's certificate store"""
 
 	try:
 		app.LOGGER.debug('Checking SSL connection to the SberSpeech service.')
-		requests.get(app.cli_args.sber_auth_url)
+		app.client_http_session.get(app.cli_args.sber_auth_url)
 		app.LOGGER.debug('SSL connection OK, required CA certificate exists in the Certifi store.')
+		return
 	except requests.exceptions.SSLError:
-		app.LOGGER.debug('SSL error, it seems there is no required CA certificate in the Certifi store. Adding one.')
+		app.LOGGER.debug('SSL error; it seems there is no required CA certificate in the Certifi store. Adding one.')
 		with open(certifi.where(), 'ab') as certifi_ca_store:
+			certifi_ca_store.write(b'\n')
 			certifi_ca_store.write( ca_cert.get() )
+		app.client_http_session.verify = certifi.where() # Make subsequent requests with the app's session use the new CA config
+	try:
+		app.LOGGER.debug('Retrying SSL connection to the SberSpeech service.')
+		app.client_http_session.get( app.cli_args.sber_auth_url)
+		app.LOGGER.debug('SSL connection OK, required CA certificate successfully added to the Certifi store.')
+	except requests.exceptions.SSLError as err:
+		app.LOGGER.debug('SSL error; failed to add CA certificate to the Certifi store.')
+		raise err
 	return
 
 
@@ -62,7 +72,6 @@ def recognize(audio: bytes, language: str) -> str:
 	"""Recognize the speech"""
 
 	headers = {
-	  	#'Content-Type': 'audio/mpeg',
 		'Content-Type': 'audio/x-pcm;bit=16;rate=16000',
 	  	'Accept': 'application/json',
 	  	'RqUID': str( uuid4() ),
@@ -73,14 +82,6 @@ def recognize(audio: bytes, language: str) -> str:
 		'model': app.cli_args.salutespeech_model,
 		'sample_rate': 16000
 	}
-
-	# Reuse HTTP(S) session if possible
-	if not app.client_http_session:
-		app.LOGGER.debug("Creating a new HTTP(S) session with the cloud service.")
-		app.client_http_session = requests.Session()
-	else:
-		app.LOGGER.debug("Reusing the existing HTTP(S) session with the cloud service.")
-
 	response = app.client_http_session.request("POST", app.cli_args.salutespeech_url, headers=headers, params=params, data=audio)
 	app.LOGGER.debug(f"Response JSON: {str(response.json())}.")
 

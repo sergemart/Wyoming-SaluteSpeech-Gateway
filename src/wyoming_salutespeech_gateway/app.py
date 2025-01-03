@@ -3,6 +3,7 @@ __package__ = 'wyoming_salutespeech_gateway'
 import argparse
 import asyncio
 import logging
+import requests
 import tempfile
 import time
 import datetime
@@ -17,7 +18,7 @@ cli_args: argparse.Namespace
 token: str = ""
 token_expiration_timestamp: float = 0.0
 token_expiration_time_delta: float = 30.0   # A protection interval before the expiration time, in seconds
-client_http_session = None
+client_http_session = requests.Session()    # To reuse HTTP connections
 LOGGER: logging.Logger
 
 
