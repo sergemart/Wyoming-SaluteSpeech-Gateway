@@ -3,7 +3,7 @@ __package__ = 'wyoming_salutespeech_gateway'
 import asyncio
 from functools import partial
 
-from wyoming.info import AsrModel, AsrProgram, Attribution, Info
+from wyoming.info import AsrModel, AsrProgram, TtsProgram, Attribution, Info
 from wyoming.server import AsyncServer
 
 from . import app, model_stub
@@ -24,7 +24,7 @@ def get_wyoming_info() -> Info:
                     name="Sergei Martynov",
                     url="https://github.com/sergemart/wyoming-salutespeech-gateway/",
                 ),
-                version="1.0",
+                version="0.1",
                 installed=True,
                 models=[
                     AsrModel(
@@ -39,6 +39,19 @@ def get_wyoming_info() -> Info:
                         languages=["ru-RU", "kz-KZ"],
                     )
                 ],
+            )
+        ],
+        tts=[
+            TtsProgram(
+                name="Wyoming-SaluteSpeech Gateway",
+                description="A gateway between a Wyoming protocol client and SberDevices SaluteSpeech STT/TTS cloud service.",
+                attribution=Attribution(
+                    name="Sergei Martynov",
+                    url="https://github.com/sergemart/wyoming-salutespeech-gateway/",
+                ),
+                installed=True,
+                version="0.1",
+                voices=[],
             )
         ],
     )
