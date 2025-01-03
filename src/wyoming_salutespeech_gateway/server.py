@@ -3,10 +3,10 @@ __package__ = 'wyoming_salutespeech_gateway'
 import asyncio
 from functools import partial
 
-from wyoming.info import AsrModel, AsrProgram, TtsProgram, Attribution, Info
+from wyoming.info import AsrModel, AsrProgram, TtsProgram, TtsVoice, Attribution, Info
 from wyoming.server import AsyncServer
 
-from . import app, model_stub
+from . import app
 from .event_handler import GatewayEventHandler
 
 
@@ -14,7 +14,8 @@ from .event_handler import GatewayEventHandler
 # region =============================================== Interface
 
 def get_wyoming_info() -> Info:
-    """ Get a Wyoming protocol implementation metadata """
+    """ Get Wyoming protocol implementation metadata """
+
     return Info(
         asr=[
             AsrProgram(
@@ -51,7 +52,74 @@ def get_wyoming_info() -> Info:
                 ),
                 installed=True,
                 version="0.1",
-                voices=[],
+                voices=[
+                    TtsVoice(
+                        name="Nec_24000",
+                        description="Наталья",
+                        attribution=Attribution(
+                            name="SberDevices",
+                            url="https://developers.sber.ru/docs/ru/salutespeech/overview",
+                        ),
+                        installed=True,
+                        version="latest",
+                        languages=["ru-RU"],
+                    ),
+                    TtsVoice(
+                        name="Bys_24000",
+                        description="Борис",
+                        attribution=Attribution(
+                            name="SberDevices",
+                            url="https://developers.sber.ru/docs/ru/salutespeech/overview",
+                        ),
+                        installed=True,
+                        version="latest",
+                        languages=["ru-RU"],
+                    ),
+                    TtsVoice(
+                        name="May_24000",
+                        description="Марфа",
+                        attribution=Attribution(
+                            name="SberDevices",
+                            url="https://developers.sber.ru/docs/ru/salutespeech/overview",
+                        ),
+                        installed=True,
+                        version="latest",
+                        languages=["ru-RU"],
+                    ),
+                    TtsVoice(
+                        name="Ost_24000",
+                        description="Александра",
+                        attribution=Attribution(
+                            name="SberDevices",
+                            url="https://developers.sber.ru/docs/ru/salutespeech/overview",
+                        ),
+                        installed=True,
+                        version="latest",
+                        languages=["ru-RU"],
+                    ),
+                    TtsVoice(
+                        name="Pon_24000",
+                        description="Сергей",
+                        attribution=Attribution(
+                            name="SberDevices",
+                            url="https://developers.sber.ru/docs/ru/salutespeech/overview",
+                        ),
+                        installed=True,
+                        version="latest",
+                        languages=["ru-RU"],
+                    ),
+                    TtsVoice(
+                        name="Kin_24000",
+                        description="Кира",
+                        attribution=Attribution(
+                            name="SberDevices",
+                            url="https://developers.sber.ru/docs/ru/salutespeech/overview",
+                        ),
+                        installed=True,
+                        version="latest",
+                        languages=["en-US"],
+                    ),
+                ],
             )
         ],
     )
