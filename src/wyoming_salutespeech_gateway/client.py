@@ -71,10 +71,11 @@ def setup_ca_cert() -> None:
 def recognize(audio: bytes, language: str) -> str:
 	"""Recognize the speech"""
 
+	url = app.cli_args.salutespeech_url + app.recognize_api_resource
 	headers = {
 		'Content-Type': 'audio/x-pcm;bit=16;rate=16000',
 	  	'Accept': 'application/json',
-	  	'RqUID': str( uuid4() ),
+	  	'X-Request-ID': str( uuid4() ),
 		'Authorization': f'Bearer {_get_auth_token()}'
 	}
 	params = {
@@ -82,7 +83,7 @@ def recognize(audio: bytes, language: str) -> str:
 		'model': app.cli_args.salutespeech_model,
 		'sample_rate': 16000
 	}
-	response = app.client_http_session.request("POST", app.cli_args.salutespeech_url, headers=headers, params=params, data=audio)
+	response = app.client_http_session.request("POST", url, headers=headers, params=params, data=audio)
 	app.LOGGER.debug(f"Response JSON: {str(response.json())}.")
 
 	if response.status_code == 200:
@@ -91,6 +92,32 @@ def recognize(audio: bytes, language: str) -> str:
 	else:
 		app.LOGGER.debug(f"Failed to upload audio: response status code: {response.status_code}, response text: '{response.text}'.")
 		return ''
+
+
+def synthesize(text: str, language: str, voice: str) -> bytes:
+	""" Synthesize the speech """
+
+	url = app.cli_args.salutespeech_url + app.synthesize_api_resource
+	headers = {
+		'Content-Type': 'application/text',
+	  	'Accept': 'audio/x-wav',
+	  	'X-Request-ID': str( uuid4() ),
+		'Authorization': f'Bearer {_get_auth_token()}'
+	}
+	params = {
+		'language': language,
+		'format': "pcm16",
+		'voice': voice
+	}
+	response = app.client_http_session.request("POST", url, headers=headers, params=params, data=text)
+
+	if response.status_code == 200:
+		app.LOGGER.debug("Text uploaded successfully")
+		return response.content
+	else:
+		app.LOGGER.debug(
+			f"Failed to synthesize audio: response status code: {response.status_code}, response text: '{response.text}'.")
+		return b""
 
 
 # endregion
