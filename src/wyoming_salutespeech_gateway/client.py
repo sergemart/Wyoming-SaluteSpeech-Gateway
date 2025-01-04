@@ -87,10 +87,10 @@ def recognize(audio: bytes, language: str) -> str:
 	app.LOGGER.debug(f"Response JSON: {str(response.json())}.")
 
 	if response.status_code == 200:
-		app.LOGGER.debug("Audio uploaded successfully")
+		app.LOGGER.debug("Audio is accepted and the result is sent back.")
 		return response.json().get('result')[0]
 	else:
-		app.LOGGER.debug(f"Failed to upload audio: response status code: {response.status_code}, response text: '{response.text}'.")
+		app.LOGGER.debug(f"Failed to recognize audio: response status code: {response.status_code}, response text: '{response.text}'.")
 		return ''
 
 
@@ -106,13 +106,13 @@ def synthesize(text: str, language: str, voice: str) -> bytes:
 	}
 	params = {
 		'language': language,
-		'format': "pcm16",
+		'format': "wav16",
 		'voice': voice
 	}
 	response = app.client_http_session.request("POST", url, headers=headers, params=params, data=text)
 
 	if response.status_code == 200:
-		app.LOGGER.debug("Text uploaded successfully")
+		app.LOGGER.debug("Text is accepted and the result is sent back.")
 		return response.content
 	else:
 		app.LOGGER.debug(
