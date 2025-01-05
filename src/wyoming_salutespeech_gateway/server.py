@@ -2,6 +2,7 @@ __package__ = 'wyoming_salutespeech_gateway'
 
 import asyncio
 from functools import partial
+import math
 
 from wyoming.info import AsrModel, AsrProgram, TtsProgram, TtsVoice, Attribution, Info
 from wyoming.server import AsyncServer
@@ -123,6 +124,18 @@ def get_wyoming_info() -> Info:
             )
         ],
     )
+
+
+def split_audio_into_chunks(audio: bytes) -> list:
+    """ Split audio stream into chunks """
+
+    chunks = []
+    bytes_per_chunk = app.cli_args.chunk_size * 2   # 2 byte (16 bit) sample width * 1 channel = 2 bytes per sample
+    chunks_number = int( math.ceil(len(audio) / bytes_per_chunk) )
+    for i in range(chunks_number):
+        offset = i * bytes_per_chunk
+        chunks.append( audio[offset: offset + bytes_per_chunk] )
+    return chunks
 
 
 async def run():

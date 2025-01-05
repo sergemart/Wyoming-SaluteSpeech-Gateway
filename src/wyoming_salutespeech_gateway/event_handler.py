@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 
 from wyoming.asr import Transcribe, Transcript
-from wyoming.audio import AudioChunk, AudioChunkConverter, AudioStop
+from wyoming.audio import AudioChunk, AudioChunkConverter, AudioStart, AudioStop
 from wyoming.event import Event
 from wyoming.info import Describe
 from wyoming.server import AsyncEventHandler
@@ -92,9 +92,20 @@ class GatewayEventHandler(AsyncEventHandler):
                 app.LOGGER.debug(f"Processing a 'Synthesize' event: the language is set to '{synthesize.voice.language}'.")
             app.LOGGER.debug(f"Processing a 'Synthesize' event: staring to synthesize the text '{text}' with the voice {self._voice}.")
             audio = client.synthesize(text=text, language=self._language, voice=self._voice)
+            chunks = server.split_audio_into_chunks(audio)
 
-            app.LOGGER.debug("Processing a 'Synthesize' event: storing the synthesized audio in the intermediate file.")
-            filename = os.path.join(self._temp_dir.name, f"{time.monotonic_ns()}.wav")
-            app.write_wav_file(str(filename), audio)
+            #app.LOGGER.debug("Processing a 'Synthesize' event: storing the synthesized audio in the intermediate file.")
+            #filename = os.path.join(self._temp_dir.name, f"{time.monotonic_ns()}.wav")
+            #app.write_wav_file(str(filename), audio)
+
+            # Send the result to a Wyoming client
+            await self.write_event(
+                AudioStart(rate=24000, width=2, channels=1).event(),
+            )
+            for chunk in chunks:
+                await self.write_event(
+                    AudioChunk(audio=chunk, rate=24000, width=2, channels=1).event(),
+                )
+            await self.write_event(AudioStop().event())
 
         return True

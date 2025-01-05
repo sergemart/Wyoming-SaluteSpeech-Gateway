@@ -100,19 +100,19 @@ def synthesize(text: str, language: str, voice: str) -> bytes:
 	url = app.cli_args.salutespeech_url + app.synthesize_api_resource
 	headers = {
 		'Content-Type': 'application/text',
-	  	'Accept': 'audio/x-wav',
+	  	'Accept': 'audio/x-pcm;bit=16;rate=24000',
 	  	'X-Request-ID': str( uuid4() ),
 		'Authorization': f'Bearer {_get_auth_token()}'
 	}
 	params = {
 		'language': language,
-		'format': "wav16",
+		'format': "pcm16",
 		'voice': voice
 	}
 	response = app.client_http_session.request("POST", url, headers=headers, params=params, data=text)
 
 	if response.status_code == 200:
-		app.LOGGER.debug("Text is accepted and a result is received.")
+		app.LOGGER.debug("The text is accepted and a result is received.")
 		return response.content
 	else:
 		app.LOGGER.debug(

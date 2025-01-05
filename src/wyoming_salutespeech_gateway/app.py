@@ -52,6 +52,7 @@ def parse_arguments() -> None:
     parser.add_argument("--salutespeech-voice", default="Ost_24000", help="SaluteSpeech synth voice: 'Ost_24000', 'May_24000' etc.")
     parser.add_argument("--download-dir", default=tempfile.TemporaryDirectory(), help="A directory to temporarily store intermediate audio files")
     parser.add_argument("--language", default="ru-RU", help="Transcription language, like 'ru-RU'")
+    parser.add_argument("--chunk-size", type=int, default=1024, help="Number of samples per Wyoming audio chunk")
     parser.add_argument("--log-level", default="WARNING", help="Log level, like 'ERROR', 'INFO', 'DEBUG' etc.")
 
     cli_args = parser.parse_args()
