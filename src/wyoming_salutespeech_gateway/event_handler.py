@@ -1,10 +1,8 @@
 __package__ = 'wyoming_salutespeech_gateway'
 
 import asyncio
-import os
 import tempfile
 import time
-from pathlib import Path
 
 from wyoming.asr import Transcribe, Transcript
 from wyoming.audio import AudioChunk, AudioChunkConverter, AudioStart, AudioStop
@@ -13,7 +11,7 @@ from wyoming.info import Describe
 from wyoming.server import AsyncEventHandler
 from wyoming.tts import Synthesize
 
-from . import app, server, client, model_stub
+from . import app, server, client
 
 
 class GatewayEventHandler(AsyncEventHandler):
@@ -29,7 +27,6 @@ class GatewayEventHandler(AsyncEventHandler):
 
         super().__init__(*args, **kwargs)
 
-        self._model = model_stub.SaluteSpeechModel()
         self._model_lock = model_lock
         self._language = app.cli_args.language
         self._voice = app.cli_args.salutespeech_voice
@@ -62,14 +59,10 @@ class GatewayEventHandler(AsyncEventHandler):
             return True
 
         if AudioStop.is_type(event.type):
-            app.LOGGER.debug("Processing an 'AudioStop' event: storing the audio in the intermediate file.")
-            filename = os.path.join(self._temp_dir.name, f"{time.monotonic_ns()}.wav")
-            app.write_wav_file(str(filename), self._audio)
-
             async with self._model_lock:
                 start_time = time.time()
                 app.LOGGER.debug("Processing an 'AudioStop' event: starting a transcription.")
-                text = self._model.transcribe( str(filename), self._language )
+                text = client.recognize(self._audio, self._language)
                 app.LOGGER.info(f"Processing an 'AudioStop' event: the transcription is completed in {time.time() - start_time:.2f} seconds")
 
             await self.write_event( Transcript(text=text).event() )
@@ -78,8 +71,6 @@ class GatewayEventHandler(AsyncEventHandler):
             # Clean up
             self._audio = b""
             self._language = app.cli_args.language
-            Path(filename).unlink()
-            app.LOGGER.debug(f"Processed an 'AudioStop' event: deleted the intermediate audio file {filename}")
 
         if Synthesize.is_type(event.type):
             synthesize = Synthesize.from_event(event)
@@ -93,10 +84,6 @@ class GatewayEventHandler(AsyncEventHandler):
             app.LOGGER.debug(f"Processing a 'Synthesize' event: staring to synthesize the text '{text}' with the voice {self._voice}.")
             audio = client.synthesize(text=text, language=self._language, voice=self._voice)
             chunks = server.split_audio_into_chunks(audio)
-
-            #app.LOGGER.debug("Processing a 'Synthesize' event: storing the synthesized audio in the intermediate file.")
-            #filename = os.path.join(self._temp_dir.name, f"{time.monotonic_ns()}.wav")
-            #app.write_wav_file(str(filename), audio)
 
             # Send the result to a Wyoming client
             await self.write_event(

@@ -85,24 +85,4 @@ def check_if_token_expired() -> bool:
     return result
 
 
-def write_wav_file(filename: str, data: bytes) -> None:
-    """ Write data to a wav file """
-
-    wav_file: wave.Wave_write = wave.open(filename, "wb")
-    with wav_file:
-        wav_file.setnchannels(1)
-        wav_file.setsampwidth(2)
-        wav_file.setframerate(16000)
-        wav_file.writeframes(data)
-    LOGGER.debug(f"Audio is written to the file {filename}")
-
-
-def write_file(filename: str, data: bytes) -> None:
-    """ Write data to a file """
-
-    with open(filename, 'wb') as file:
-        file.write(data)
-    LOGGER.debug(f"Data is written to the file {filename}")
-
-
 # endregion
