@@ -126,16 +126,14 @@ def get_wyoming_info() -> Info:
     )
 
 
-def split_audio_into_chunks(audio: bytes) -> list:
-    """ Split audio stream into chunks """
+def split_audio_into_chunks(audio: bytes):
+    """ A generator function to split an audio stream into chunks """
 
-    chunks = []
     bytes_per_chunk = app.cli_args.chunk_size * 2   # 2 byte (16 bit) sample width * 1 channel = 2 bytes per sample
     chunks_number = int( math.ceil(len(audio) / bytes_per_chunk) )
     for i in range(chunks_number):
         offset = i * bytes_per_chunk
-        chunks.append( audio[offset: offset + bytes_per_chunk] )
-    return chunks
+        yield audio[offset: offset + bytes_per_chunk]
 
 
 async def run():
