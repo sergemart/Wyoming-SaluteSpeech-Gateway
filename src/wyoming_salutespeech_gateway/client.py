@@ -112,7 +112,7 @@ def synthesize(text: str, language: str, voice: str) -> bytes:
 	response = app.client_http_session.request("POST", url, headers=headers, params=params, data=text)
 
 	if response.status_code == 200:
-		app.LOGGER.debug("Text is accepted and the result is sent back.")
+		app.LOGGER.debug("Text is accepted and a result is received.")
 		return response.content
 	else:
 		app.LOGGER.debug(

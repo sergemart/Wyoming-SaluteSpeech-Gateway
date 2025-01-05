@@ -1,6 +1,5 @@
 __package__ = 'wyoming_salutespeech_gateway'
 
-import argparse
 import asyncio
 import os
 import tempfile
@@ -10,10 +9,11 @@ from pathlib import Path
 from wyoming.asr import Transcribe, Transcript
 from wyoming.audio import AudioChunk, AudioChunkConverter, AudioStop
 from wyoming.event import Event
-from wyoming.info import Describe, Info
+from wyoming.info import Describe
 from wyoming.server import AsyncEventHandler
+from wyoming.tts import Synthesize
 
-from . import app, server, model_stub
+from . import app, server, client, model_stub
 
 
 class GatewayEventHandler(AsyncEventHandler):
@@ -32,6 +32,7 @@ class GatewayEventHandler(AsyncEventHandler):
         self._model = model_stub.SaluteSpeechModel()
         self._model_lock = model_lock
         self._language = app.cli_args.language
+        self._voice = app.cli_args.salutespeech_voice
         self._temp_dir = tempfile.TemporaryDirectory()
         self._audio = b""
         self._audio_converter = AudioChunkConverter(rate=16000, width=2, channels=1)
@@ -61,7 +62,7 @@ class GatewayEventHandler(AsyncEventHandler):
             return True
 
         if AudioStop.is_type(event.type):
-            app.LOGGER.debug("Processing an 'AudioStop' event: storing the audio to the intermediate file.")
+            app.LOGGER.debug("Processing an 'AudioStop' event: storing the audio in the intermediate file.")
             filename = os.path.join(self._temp_dir.name, f"{time.monotonic_ns()}.wav")
             app.write_wav_file(str(filename), self._audio)
 
@@ -72,12 +73,28 @@ class GatewayEventHandler(AsyncEventHandler):
                 app.LOGGER.info(f"Processing an 'AudioStop' event: the transcription is completed in {time.time() - start_time:.2f} seconds")
 
             await self.write_event( Transcript(text=text).event() )
-            app.LOGGER.debug("Processed an 'AudioStop' event: data sent to the client.")
+            app.LOGGER.debug("Processed an 'AudioStop' event: data is sent to the client.")
 
             # Clean up
             self._audio = b""
             self._language = app.cli_args.language
             Path(filename).unlink()
             app.LOGGER.debug(f"Processed an 'AudioStop' event: deleted the intermediate audio file {filename}")
+
+        if Synthesize.is_type(event.type):
+            synthesize = Synthesize.from_event(event)
+            text = synthesize.text
+            if synthesize.voice:
+                self._voice = synthesize.voice.name
+                self._language = synthesize.voice.language
+                app.LOGGER.debug("Processing a 'Synthesize' event: the event conveys a 'voice' object.")
+                app.LOGGER.debug(f"Processing a 'Synthesize' event: the voice is set to '{synthesize.voice.name}'.")
+                app.LOGGER.debug(f"Processing a 'Synthesize' event: the language is set to '{synthesize.voice.language}'.")
+            app.LOGGER.debug(f"Processing a 'Synthesize' event: staring to synthesize the text '{text}' with the voice {self._voice}.")
+            audio = client.synthesize(text=text, language=self._language, voice=self._voice)
+
+            app.LOGGER.debug("Processing a 'Synthesize' event: storing the synthesized audio in the intermediate file.")
+            filename = os.path.join(self._temp_dir.name, f"{time.monotonic_ns()}.wav")
+            app.write_wav_file(str(filename), audio)
 
         return True
