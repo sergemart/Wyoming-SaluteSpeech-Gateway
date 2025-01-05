@@ -111,7 +111,7 @@ def get_wyoming_info() -> Info:
                     ),
                     TtsVoice(
                         name="Kin_24000",
-                        description="Кира",
+                        description="Kira",
                         attribution=Attribution(
                             name="SberDevices",
                             url="https://developers.sber.ru/docs/ru/salutespeech/overview",

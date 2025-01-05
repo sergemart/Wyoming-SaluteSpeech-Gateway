@@ -7,7 +7,6 @@ import requests
 import tempfile
 import time
 import datetime
-import wave
 
 from . import server, client
 

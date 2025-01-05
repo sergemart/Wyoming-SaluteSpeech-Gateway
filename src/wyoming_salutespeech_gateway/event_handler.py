@@ -1,7 +1,6 @@
 __package__ = 'wyoming_salutespeech_gateway'
 
 import asyncio
-import tempfile
 import time
 
 from wyoming.asr import Transcribe, Transcript
@@ -30,7 +29,6 @@ class GatewayEventHandler(AsyncEventHandler):
         self._model_lock = model_lock
         self._language = app.cli_args.language
         self._voice = app.cli_args.salutespeech_voice
-        self._temp_dir = tempfile.TemporaryDirectory()
         self._audio = b""
         self._audio_converter = AudioChunkConverter(rate=16000, width=2, channels=1)
 
@@ -63,10 +61,10 @@ class GatewayEventHandler(AsyncEventHandler):
                 start_time = time.time()
                 app.LOGGER.debug("Processing an 'AudioStop' event: starting a transcription.")
                 text = client.recognize(self._audio, self._language)
-                app.LOGGER.info(f"Processing an 'AudioStop' event: the transcription is completed in {time.time() - start_time:.2f} seconds")
+                app.LOGGER.info(f"Processing an 'AudioStop' event: the transcription is completed in {time.time() - start_time:.2f} seconds.")
 
             await self.write_event( Transcript(text=text).event() )
-            app.LOGGER.debug("Processed an 'AudioStop' event: data is sent to the client.")
+            app.LOGGER.debug("Processed an 'AudioStop' event: the recognized text is sent to a Wyoming client.")
 
             # Clean up
             self._audio = b""
@@ -76,13 +74,15 @@ class GatewayEventHandler(AsyncEventHandler):
             synthesize = Synthesize.from_event(event)
             text = synthesize.text
             if synthesize.voice:
-                self._voice = synthesize.voice.name
-                self._language = synthesize.voice.language
                 app.LOGGER.debug("Processing a 'Synthesize' event: the event conveys a 'voice' object.")
-                app.LOGGER.debug(f"Processing a 'Synthesize' event: the voice is set to '{synthesize.voice.name}'.")
-                app.LOGGER.debug(f"Processing a 'Synthesize' event: the language is set to '{synthesize.voice.language}'.")
-            app.LOGGER.debug(f"Processing a 'Synthesize' event: staring to synthesize the text '{text}' with the voice {self._voice}.")
+                self._voice = synthesize.voice.name if synthesize.voice.name else app.cli_args.salutespeech_voice
+                self._language = synthesize.voice.language if synthesize.voice.language else app.cli_args.language
+                app.LOGGER.debug(f"Processing a 'Synthesize' event: the voice is set to '{self._voice}'.")
+                app.LOGGER.debug(f"Processing a 'Synthesize' event: the language is set to '{self._language}'.")
+            start_time = time.time()
+            app.LOGGER.debug(f"Processing a 'Synthesize' event: starting to synthesize the text '{text}'.")
             audio = client.synthesize(text=text, language=self._language, voice=self._voice)
+            app.LOGGER.info(f"Processing a 'Synthesize' event: the synthesis is completed in {time.time() - start_time:.2f} seconds.")
             chunks = server.split_audio_into_chunks(audio)
 
             # Send the result to a Wyoming client
@@ -94,5 +94,10 @@ class GatewayEventHandler(AsyncEventHandler):
                     AudioChunk(audio=chunk, rate=24000, width=2, channels=1).event(),
                 )
             await self.write_event(AudioStop().event())
+            app.LOGGER.debug("Processed a 'Synthesize' event: the synthesized audio is sent to a Wyoming client.")
+
+            # Clean up
+            self._voice = app.cli_args.salutespeech_voice
+            self._language = app.cli_args.language
 
         return True
