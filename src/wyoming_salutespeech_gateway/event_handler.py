@@ -1,6 +1,5 @@
 __package__ = 'wyoming_salutespeech_gateway'
 
-import asyncio
 import time
 
 from wyoming.asr import Transcribe, Transcript
@@ -18,7 +17,6 @@ class GatewayEventHandler(AsyncEventHandler):
 
     def __init__(
         self,
-        model_lock: asyncio.Lock,
         *args,
         **kwargs,
     ) -> None:
@@ -26,7 +24,6 @@ class GatewayEventHandler(AsyncEventHandler):
 
         super().__init__(*args, **kwargs)
 
-        self._model_lock = model_lock
         self._language = app.cli_args.language
         self._voice = app.cli_args.salutespeech_voice
         self._audio = b""
@@ -57,11 +54,10 @@ class GatewayEventHandler(AsyncEventHandler):
             return True
 
         if AudioStop.is_type(event.type):
-            async with self._model_lock:
-                start_time = time.time()
-                app.LOGGER.debug("Processing an 'AudioStop' event: starting a transcription.")
-                text = client.recognize(self._audio, self._language)
-                app.LOGGER.info(f"Processing an 'AudioStop' event: the transcription is completed in {time.time() - start_time:.2f} seconds.")
+            start_time = time.time()
+            app.LOGGER.debug("Processing an 'AudioStop' event: starting a transcription.")
+            text = client.recognize(self._audio, self._language)
+            app.LOGGER.info(f"Processing an 'AudioStop' event: the transcription is completed in {time.time() - start_time:.2f} seconds.")
 
             await self.write_event( Transcript(text=text).event() )
             app.LOGGER.debug("Processed an 'AudioStop' event: the recognized text is sent to a Wyoming client.")

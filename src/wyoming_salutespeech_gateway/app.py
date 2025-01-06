@@ -29,7 +29,7 @@ LOGGER: logging.Logger
 def start() -> None:
     """ Start the app """
 
-    LOGGER.info('Wyoming-Salutespeech Gateway is starting')
+    LOGGER.info('Wyoming-Salutespeech Gateway is starting.')
     client.setup_ca_cert()
     asyncio.run( server.run() )
 

@@ -141,11 +141,9 @@ async def run():
 
     wyoming_server = AsyncServer.from_uri(app.cli_args.listen_uri)
     app.LOGGER.info("Wyoming server is instantiated.")
-    model_lock = asyncio.Lock()
     await wyoming_server.run(
         partial(
-            GatewayEventHandler,
-            model_lock,
+            GatewayEventHandler
         )
     )
 
