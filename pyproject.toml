@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wyoming-salutespeech-gateway"
-version = "0.2"
+version = "0.3"
 description = "A gateway between a Wyoming protocol client and SberDevices SaluteSpeech STT/TTS cloud service."
 authors = ["sergemart <serge.martynov@gmail.com>"]
 readme = "README.md"

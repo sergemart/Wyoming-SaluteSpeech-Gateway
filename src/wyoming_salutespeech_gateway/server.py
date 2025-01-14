@@ -26,7 +26,7 @@ def get_wyoming_info() -> Info:
                     name="Sergei Martynov",
                     url="https://github.com/sergemart/wyoming-salutespeech-gateway/",
                 ),
-                version="0.2",
+                version="0.3",
                 installed=True,
                 models=[
                     AsrModel(
@@ -52,7 +52,7 @@ def get_wyoming_info() -> Info:
                     url="https://github.com/sergemart/wyoming-salutespeech-gateway/",
                 ),
                 installed=True,
-                version="0.2",
+                version="0.3",
                 voices=[
                     TtsVoice(
                         name="Nec_24000",
