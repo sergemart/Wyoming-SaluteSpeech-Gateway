@@ -52,7 +52,7 @@ def parse_arguments() -> None:
     parser.add_argument("--salutespeech-model", default="general", help="SaluteSpeech AI model flavor: 'general', 'media', 'ivr', 'callcenter'")
     parser.add_argument("--salutespeech-voice", default="Ost_24000", help="SaluteSpeech synth voice: 'Ost_24000', 'May_24000' etc.")
     parser.add_argument("--keep-audio-files", action="store_true", help="Keep intermediate audio files, if set")
-    parser.add_argument("--download-dir", default=tempfile.TemporaryDirectory(), help="A directory to temporarily store intermediate audio files")
+    parser.add_argument("--download-dir", default=tempfile.TemporaryDirectory().name, help="A directory to temporarily store intermediate audio files")
     parser.add_argument("--language", default="ru-RU", help="Transcription language, like 'ru-RU'")
     parser.add_argument("--chunk-size", type=int, default=1024, help="Number of samples per Wyoming audio chunk")
     parser.add_argument("--log-level", default="WARNING", help="Log level, like 'ERROR', 'INFO', 'DEBUG' etc.")
@@ -91,6 +91,8 @@ def write_wav(prefix: str, audio: bytes, framerate: float) -> None:
     """ Write pcm audio data to a wav file """
 
     filename = os.path.join(cli_args.download_dir, f"{prefix}{time.monotonic_ns()}.wav")
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+
     wav_file: wave.Wave_write = wave.open(filename, "wb")
     with wav_file:
         wav_file.setnchannels(1)
