@@ -2,11 +2,13 @@ __package__ = 'wyoming_salutespeech_gateway'
 
 import argparse
 import asyncio
+import datetime
 import logging
+import os
 import requests
 import tempfile
 import time
-import datetime
+import wave
 
 from . import server, client
 
@@ -49,6 +51,7 @@ def parse_arguments() -> None:
     parser.add_argument("--salutespeech-url", default="https://smartspeech.sber.ru/rest/v1", help="SaluteSpeech service URL")
     parser.add_argument("--salutespeech-model", default="general", help="SaluteSpeech AI model flavor: 'general', 'media', 'ivr', 'callcenter'")
     parser.add_argument("--salutespeech-voice", default="Ost_24000", help="SaluteSpeech synth voice: 'Ost_24000', 'May_24000' etc.")
+    parser.add_argument("--keep-audio-files", action="store_true", help="Keep intermediate audio files, if set")
     parser.add_argument("--download-dir", default=tempfile.TemporaryDirectory(), help="A directory to temporarily store intermediate audio files")
     parser.add_argument("--language", default="ru-RU", help="Transcription language, like 'ru-RU'")
     parser.add_argument("--chunk-size", type=int, default=1024, help="Number of samples per Wyoming audio chunk")
@@ -83,5 +86,17 @@ def check_if_token_expired() -> bool:
     result: bool = current_time > token_expiration_timestamp - token_expiration_time_delta
     return result
 
+
+def write_wav(prefix: str, audio: bytes, framerate: float) -> None:
+    """ Write pcm audio data to a wav file """
+
+    filename = os.path.join(cli_args.download_dir, f"{prefix}{time.monotonic_ns()}.wav")
+    wav_file: wave.Wave_write = wave.open(filename, "wb")
+    with wav_file:
+        wav_file.setnchannels(1)
+        wav_file.setsampwidth(2)
+        wav_file.setframerate(framerate)
+        wav_file.writeframes(audio)
+    LOGGER.debug(f"Audio is written to the file {filename}")
 
 # endregion

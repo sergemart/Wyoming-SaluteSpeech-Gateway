@@ -71,6 +71,9 @@ def setup_ca_cert() -> None:
 def recognize(audio: bytes, language: str) -> str:
 	"""Recognize the speech"""
 
+	if app.cli_args.keep_audio_files:
+		app.write_wav(prefix='to_be_recognized_', audio=audio, framerate=16000)
+
 	url = app.cli_args.salutespeech_url + app.recognize_api_resource
 	headers = {
 		'Content-Type': 'audio/x-pcm;bit=16;rate=16000',
@@ -113,6 +116,8 @@ def synthesize(text: str, language: str, voice: str) -> bytes:
 
 	if response.status_code == 200:
 		app.LOGGER.debug("The text is accepted and a result is received.")
+		if app.cli_args.keep_audio_files:
+			app.write_wav(prefix='synthesized_', audio=response.content, framerate=24000)
 		return response.content
 	else:
 		app.LOGGER.debug(
