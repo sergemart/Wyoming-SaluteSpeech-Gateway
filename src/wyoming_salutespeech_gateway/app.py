@@ -90,7 +90,7 @@ def check_if_token_expired() -> bool:
 def write_wav(prefix: str, audio: bytes, framerate: float) -> None:
     """ Write pcm audio data to a wav file """
 
-    filename = os.path.join(cli_args.download_dir, f"{prefix}{ datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%MS") }.wav")
+    filename = os.path.join(cli_args.download_dir, f"{prefix}{ datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")[:-3] }.wav")
     os.makedirs(os.path.dirname(filename), exist_ok=True)
 
     wav_file: wave.Wave_write = wave.open(filename, "wb")
