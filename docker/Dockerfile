@@ -8,6 +8,8 @@ RUN apk add --update --no-cache bash nano python3 poetry git \
 
 COPY entrypoint.sh /
 
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 9999/tcp
 
 ENV NO_COLOR=1
