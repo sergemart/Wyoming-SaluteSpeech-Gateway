@@ -10,15 +10,16 @@ A gateway between a Wyoming protocol client and SberDevices SaluteSpeech STT/TTS
 ```commandline
 pip install poetry
 git clone https://github.com/sergemart/Wyoming-SaluteSpeech-Gateway.git
+cd Wyoming-SaluteSpeech-Gateway
 poetry install
 ```
 Запуск с настройками по умолчанию / Run with default options:
 ```commandline
-python3 src/wyoming_salutespeech_gateway --auth-key your_authorization_key
+poetry run python3 src/wyoming_salutespeech_gateway --auth-key your_authorization_key
 ```
 Запуск с настройками для отладки / Run with debug options:
 ```commandline
-python3 src/wyoming_salutespeech_gateway --log-level=DEBUG --keep-audio-files --download-dir=~/downloads/WAVs --auth-key=your_authorization_key
+poetry run python3 src/wyoming_salutespeech_gateway --log-level=DEBUG --keep-audio-files --download-dir=~/downloads/WAVs --auth-key=your_authorization_key
 ```
 
 Возможные параметры запуска / Command line options:
