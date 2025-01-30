@@ -6,23 +6,22 @@ A gateway between a Wyoming protocol client and SberDevices SaluteSpeech STT/TTS
 
 Это не интеграция Home Assistant, а отдельный сервис. Для клиента Wyoming (например, Home Assistant) он выглядит как сервер Wyoming. Чтобы использовать этот сервис в HA, нужно добавить интеграцию Wyoming Protocol и указать имя/адрес и порт сервиса (по умолчанию 9999).
 
-Установка / Install:
+##### Установка / Install:
 ```commandline
 pip install poetry
 git clone https://github.com/sergemart/Wyoming-SaluteSpeech-Gateway.git
 cd Wyoming-SaluteSpeech-Gateway
 poetry install
 ```
-Запуск с настройками по умолчанию / Run with default options:
+##### Запуск с настройками по умолчанию / Run with default options:
 ```commandline
 poetry run python3 src/wyoming_salutespeech_gateway --auth-key your_authorization_key
 ```
-Запуск с настройками для отладки / Run with debug options:
+##### Запуск с настройками для отладки / Run with debug options:
 ```commandline
 poetry run python3 src/wyoming_salutespeech_gateway --log-level=DEBUG --keep-audio-files --download-dir=~/downloads/WAVs --auth-key=your_authorization_key
 ```
-
-Возможные параметры запуска / Command line options:
+##### Возможные параметры запуска / Command line options:
 ```commandline
 usage: __main__.py [-h] [--auth-key AUTH_KEY] [--listen-uri LISTEN_URI]
                    [--sber-auth-url SBER_AUTH_URL]
@@ -59,5 +58,17 @@ options:
                         Number of samples per Wyoming audio chunk
   --log-level LOG_LEVEL
                         Log level, like 'ERROR', 'INFO', 'DEBUG' etc.
-
+```
+##### Установка в контейнер:
+```
+cd docker
+```
+Здесь нужно отредактировать файл `entrypoint.sh` и записать в него свой ключ авторизации.
+Создать образ:
+```
+docker build --tag wssg .
+```
+Создать и запустить контейнер:
+```commandline
+docker run -d --name wssg -p 9999:9999 wssg:latest
 ```
