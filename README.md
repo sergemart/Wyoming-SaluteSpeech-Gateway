@@ -59,7 +59,7 @@ options:
   --log-level LOG_LEVEL
                         Log level, like 'ERROR', 'INFO', 'DEBUG' etc.
 ```
-##### Установка в контейнер:
+##### Установка в контейнер / Container install:
 ```
 cd docker
 ```
