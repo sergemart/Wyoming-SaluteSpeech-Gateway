@@ -49,6 +49,8 @@ options:
   --salutespeech-voice SALUTESPEECH_VOICE
                         SaluteSpeech synth voice: 'Ost_24000', 'May_24000'
                         etc.
+  --ssml-template SSML_TEMPLATE
+                        A name of the SSML template file, if SSML is used
   --keep-audio-files    Keep intermediate audio files, if set
   --download-dir DOWNLOAD_DIR
                         A directory to temporarily store intermediate audio
@@ -59,6 +61,10 @@ options:
   --log-level LOG_LEVEL
                         Log level, like 'ERROR', 'INFO', 'DEBUG' etc.
 ```
+##### SSML
+Шлюз можно запустить с поддержкой разметки SSML при синтезе речи (см. https://developers.sber.ru/docs/ru/salutespeech/guides/synthesis/ssml). Разметка SSML берётся из шаблона, на который указывает параметр `--ssml-template`. Единственная переменная, которую поддерживает шаблон - `${text}` (собственно, сам синтезируемый текст).
+Пример шаблона есть в каталоге с исходниками.
+
 ##### Установка в контейнер / Container install:
 ```
 cd docker
