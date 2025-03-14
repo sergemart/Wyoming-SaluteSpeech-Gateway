@@ -7,6 +7,7 @@ def main():
     """ Prepare the app context and start the app """
     app.parse_arguments()
     app.setup_custom_logger('root')
+    app.load_ssml_template()
     app.start()
 
 

@@ -9,6 +9,7 @@ import requests
 import tempfile
 import time
 import wave
+from string import Template
 
 from . import server, client
 
@@ -16,6 +17,7 @@ from . import server, client
 # region =============================================== The app context
 
 cli_args: argparse.Namespace
+ssml_template: str = ""
 token: str = ""
 token_expiration_timestamp: float = 0.0
 token_expiration_time_delta: float = 30.0   # A protection interval before the expiration time, in seconds
@@ -51,6 +53,7 @@ def parse_arguments() -> None:
     parser.add_argument("--salutespeech-url", default="https://smartspeech.sber.ru/rest/v1", help="SaluteSpeech service URL")
     parser.add_argument("--salutespeech-model", default="general", help="SaluteSpeech AI model flavor: 'general', 'media', 'ivr', 'callcenter'")
     parser.add_argument("--salutespeech-voice", default="Ost_24000", help="SaluteSpeech synth voice: 'Ost_24000', 'May_24000' etc.")
+    parser.add_argument("--ssml-template", help="A name of the SSML template file, if SSML is used")
     parser.add_argument("--keep-audio-files", action="store_true", help="Keep intermediate audio files, if set")
     parser.add_argument("--download-dir", default=tempfile.TemporaryDirectory().name, help="A directory to temporarily store intermediate audio files")
     parser.add_argument("--language", default="ru-RU", help="Transcription language, like 'ru-RU'")
@@ -60,8 +63,22 @@ def parse_arguments() -> None:
     cli_args = parser.parse_args()
 
 
+def load_ssml_template():
+    """ Load SSML template, if used """
+
+    if cli_args.ssml_template is None:
+        return # No SSML template is defined, skipping
+    global ssml_template
+    try:
+        with open(cli_args.ssml_template, 'r') as file:
+            ssml_template = file.read()
+    except FileNotFoundError:
+        LOGGER.debug(f"SSML template file is not found: '{cli_args.ssml_template}'")
+        cli_args.ssml_template = None # Drop the template name to switch off the further SSML logic
+
+
 def setup_custom_logger(name) -> None:
-    """ Set up the app logger"""
+    """ Set up the app logger """
 
     global LOGGER
     formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
@@ -74,17 +91,26 @@ def setup_custom_logger(name) -> None:
 
 
 def get_time_from_timestamp(timestamp: float):
-    """ Get a human-readable time string from the unix (epoch) time number"""
+    """ Get a human-readable time string from the unix (epoch) time number """
     return datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
 
 
 def check_if_token_expired() -> bool:
-    """Check if the authentication token expired. Returns True if the token is expired"""
+    """ Check if the authentication token expired. Returns True if the token is expired """
 
     global token_expiration_timestamp, token_expiration_time_delta
     current_time: int = int( time.time() )
     result: bool = current_time > token_expiration_timestamp - token_expiration_time_delta
     return result
+
+
+def get_synthesize_payload(text: str) -> str:
+    """ Get a request payload formatted as SSML, if SSML template is used """
+    if cli_args.ssml_template is None:
+        return text # No SSML template is defined, skipping
+
+    template = Template(ssml_template)
+    return template.substitute( {'text': text} )
 
 
 def write_wav(prefix: str, audio: bytes, framerate: float) -> None:
