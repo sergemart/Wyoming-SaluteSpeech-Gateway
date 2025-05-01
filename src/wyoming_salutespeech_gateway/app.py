@@ -108,7 +108,9 @@ def check_if_token_expired() -> bool:
 def get_synthesize_payload(text: str) -> str:
     """ Get a request payload formatted as SSML, if SSML template is used """
 
-    payload: str = re.sub(r'<.*?>', '', text, flags=re.DOTALL) # Getting rid of occasional XML tags
+    #payload: str = re.sub(r'<.*?>', '', text, flags=re.DOTALL) # Getting rid of occasional XML tags
+    pattern = r'^\s*(?:<think>.*?</think>\s*|<think>\s*)'
+    payload = re.sub(pattern, '', text, count=1, flags=re.DOTALL)
 
     if cli_args.ssml_template is None:
         return payload # No SSML template is defined, skipping
