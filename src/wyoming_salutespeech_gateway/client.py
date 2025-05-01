@@ -112,7 +112,9 @@ def synthesize(text: str, language: str, voice: str) -> bytes:
 		'format': "pcm16",
 		'voice': voice
 	}
-	response = app.client_http_session.request( "POST", url, headers=headers, params=params, data=app.get_synthesize_payload(text))
+	payload = app.get_synthesize_payload(text)
+	app.LOGGER.debug(f"The final text to synthesize: {payload}")
+	response = app.client_http_session.request( "POST", url, headers=headers, params=params, data=payload)
 
 	if response.status_code == 200:
 		app.LOGGER.debug("The text is accepted and a result is received.")
