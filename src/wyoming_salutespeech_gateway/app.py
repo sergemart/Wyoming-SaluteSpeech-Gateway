@@ -9,6 +9,7 @@ import requests
 import tempfile
 import time
 import wave
+import re
 from string import Template
 
 from . import server, client
@@ -106,11 +107,14 @@ def check_if_token_expired() -> bool:
 
 def get_synthesize_payload(text: str) -> str:
     """ Get a request payload formatted as SSML, if SSML template is used """
+
+    payload: str = re.sub(r'<.*?>', '', text, flags=re.DOTALL) # Getting rid of occasional XML tags
+
     if cli_args.ssml_template is None:
-        return text # No SSML template is defined, skipping
+        return payload # No SSML template is defined, skipping
 
     template = Template(ssml_template)
-    return template.substitute( {'text': text} )
+    return template.substitute( {'text': payload} )
 
 
 def write_wav(prefix: str, audio: bytes, framerate: float) -> None:
