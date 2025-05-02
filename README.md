@@ -28,9 +28,10 @@ usage: __main__.py [-h] [--auth-key AUTH_KEY] [--listen-uri LISTEN_URI]
                    [--salutespeech-url SALUTESPEECH_URL]
                    [--salutespeech-model SALUTESPEECH_MODEL]
                    [--salutespeech-voice SALUTESPEECH_VOICE]
-                   [--keep-audio-files] [--download-dir DOWNLOAD_DIR]
-                   [--language LANGUAGE] [--chunk-size CHUNK_SIZE]
-                   [--log-level LOG_LEVEL]
+                   [--ssml-template SSML_TEMPLATE]
+                   [--tags-to-remove TAGS_TO_REMOVE] [--keep-audio-files]
+                   [--download-dir DOWNLOAD_DIR] [--language LANGUAGE]
+                   [--chunk-size CHUNK_SIZE] [--log-level LOG_LEVEL]
 
 options:
   -h, --help            show this help message and exit
@@ -51,6 +52,9 @@ options:
                         etc.
   --ssml-template SSML_TEMPLATE
                         A name of the SSML template file, if SSML is used
+  --tags-to-remove TAGS_TO_REMOVE
+                        A comma-separated list of XML tags (without <>) which
+                        should be removed from a text to be synthesized
   --keep-audio-files    Keep intermediate audio files, if set
   --download-dir DOWNLOAD_DIR
                         A directory to temporarily store intermediate audio
