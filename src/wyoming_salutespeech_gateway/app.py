@@ -55,6 +55,7 @@ def parse_arguments() -> None:
     parser.add_argument("--salutespeech-model", default="general", help="SaluteSpeech AI model flavor: 'general', 'media', 'ivr', 'callcenter'")
     parser.add_argument("--salutespeech-voice", default="Ost_24000", help="SaluteSpeech synth voice: 'Ost_24000', 'May_24000' etc.")
     parser.add_argument("--ssml-template", help="A name of the SSML template file, if SSML is used")
+    parser.add_argument("--tags-to-remove", type=lambda s: s.split(','), help="A comma-separated list of XML tags (without <>) which should be removed from a text to be synthesized")
     parser.add_argument("--keep-audio-files", action="store_true", help="Keep intermediate audio files, if set")
     parser.add_argument("--download-dir", default=tempfile.TemporaryDirectory().name, help="A directory to temporarily store intermediate audio files")
     parser.add_argument("--language", default="ru-RU", help="Transcription language, like 'ru-RU'")
@@ -108,15 +109,16 @@ def check_if_token_expired() -> bool:
 def get_synthesize_payload(text: str) -> str:
     """ Get a request payload formatted as SSML, if SSML template is used """
 
-    #payload: str = re.sub(r'<.*?>', '', text, flags=re.DOTALL) # Getting rid of occasional XML tags
-    pattern = r'^\s*(?:<think>.*?</think>\s*|<think>\s*)'
-    payload = re.sub(pattern, '', text, count=1, flags=re.DOTALL).strip()
+    if cli_args.tags_to_remove is not None:
+        for tag in cli_args.tags_to_remove:
+            pattern = rf"<{tag}[^>]*>.*?</{tag}>|<{tag}>"
+            text = re.sub(pattern, '', text, count=1, flags=re.DOTALL).strip()
 
     if cli_args.ssml_template is None:
-        return payload # No SSML template is defined, skipping
+        return text # No SSML template is defined, skipping
 
     template = Template(ssml_template)
-    return template.substitute( {'text': payload} )
+    return template.substitute( {'text': text} )
 
 
 def write_wav(prefix: str, audio: bytes, framerate: float) -> None:

@@ -15,6 +15,26 @@ test_data = [
         "expected": "payload_to_keep"
     },
     {
+        "input": "payload_to_keep<think> content_to_drop </think>",
+        "expected": "payload_to_keep"
+    },
+    {
+        "input": "<think> content_to_drop <tag1>content_to_drop</tag1>  </think>payload_to_keep",
+        "expected": "payload_to_keep"
+    },
+    {
+        "input": "<think> content_to_drop <tag1>content_to_drop<tag2>content_to_drop</tag2></tag1>  </think>payload_to_keep",
+        "expected": "payload_to_keep"
+    },
+    {
+        "input": "<think> content_to_drop <tag1>content_to_drop<tag2>content_to_drop</tag2></tag1>  </think>payload_to_keep",
+        "expected": "payload_to_keep"
+    },
+    {
+        "input": "<think> content_to_drop <tag1>content_to_drop</tag1></think>payload_to_keep<tag2>content_to_drop</tag2>",
+        "expected": "payload_to_keep"
+    },
+    {
         "input": "<think> payload_to_keep",
         "expected": "payload_to_keep"
     },
@@ -50,8 +70,12 @@ test_data = [
 
 for case in test_data:
     text = case['input']
-    if app.get_synthesize_payload( text ) == case['expected']:
+    expected = case['expected']
+    result = app.get_synthesize_payload( text )
+    if result == expected:
         print("PASS")
     else:
-        print(f"FAIL for: {text}")
-
+        print(f"FAIL:")
+        print(f"\tinput:\t\t {text}")
+        print(f"\tresult:\t\t {result}")
+        print(f"\texpected:\t {expected}")
