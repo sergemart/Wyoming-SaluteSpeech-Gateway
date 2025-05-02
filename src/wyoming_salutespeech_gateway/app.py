@@ -110,7 +110,7 @@ def get_synthesize_payload(text: str) -> str:
 
     #payload: str = re.sub(r'<.*?>', '', text, flags=re.DOTALL) # Getting rid of occasional XML tags
     pattern = r'^\s*(?:<think>.*?</think>\s*|<think>\s*)'
-    payload = re.sub(pattern, '', text, count=1, flags=re.DOTALL)
+    payload = re.sub(pattern, '', text, count=1, flags=re.DOTALL).strip()
 
     if cli_args.ssml_template is None:
         return payload # No SSML template is defined, skipping
